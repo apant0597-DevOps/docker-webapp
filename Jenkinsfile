@@ -8,22 +8,31 @@ pipeline {
         stage('MAVEN BUILD'){
             steps {
                 sh 'mvn clean package'
-		sh 'mv target/*.war target/tomcat-app.war'
+		        sh 'mv target/*.war target/tomcat-app.war'
             }
         }
-	stage('DEPLOY'){
+	    stage('DOCKER BUILD'){
             steps {
-                sshagent(['jenkins-agent-creds']) {
-                    sh '''
-                
-                    scp -o StrictHostKeyChecking=no target/tomcat-app.war ec2-user@172.31.27.181:/opt/tomcat9/webapps
-                    ssh ec2-user@172.31.27.181 /opt/tomcat9/bin/shutdown.sh
-                    ssh ec2-user@172.31.27.181 /opt/tomcat9/bin/startup.sh
-                
-                    '''
+                sh '''
+				
+				docker build . -t maven-webapp:v1
+				
+				'''
+            }  
+        }
+	    stage('DOCKER PUSH'){
+            steps {
+                withCredentials([string(credentialsId: 'docker-cred', variable: 'dockerhubcred')]) {
+                sh '''
+				
+				docker login -u apant0597 -p ${dockerhubcred}
+				docker push apant0597/maven-webapp:v1
+				
+				'''
             }
-        }  
-    }
+                
+            }  
+        }
     }
     	post {
             success { 

@@ -1,4 +1,4 @@
-currentBuild.displayName = "Maven-App-"+currentBuild.number
+currentBuild.displayName = "Docker-Webapp-"+currentBuild.number
 pipeline {
     agent any
     tools {
@@ -14,7 +14,7 @@ pipeline {
 	    stage('DOCKER BUILD'){
             steps {
                 sh '''		
-		docker build . -t apant0597/maven-webapp:v1			
+		docker build . -t apant0597/maven-webapp:v2			
 		'''
             }  
         }
@@ -23,7 +23,7 @@ pipeline {
                 withCredentials([string(credentialsId: 'docker-cred', variable: 'dockerhubcred')]) {
                 sh '''
 		docker login -u apant0597 -p ${dockerhubcred}
-		docker push apant0597/maven-webapp:v1		
+		docker push apant0597/maven-webapp:v2
 		'''
             }
                 
